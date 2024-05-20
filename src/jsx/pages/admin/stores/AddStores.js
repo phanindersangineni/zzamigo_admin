@@ -243,6 +243,7 @@ const AddStores = ({ tenantprops, updateprop }) => {
 
             } else {
                 //update
+                console.log("updated successfully!!!",formfields);
                 const Response = await UpdateStores(formfields);
                 if (Response.data.id) {
                     notifyTopFullWidth("Data updated successfully");

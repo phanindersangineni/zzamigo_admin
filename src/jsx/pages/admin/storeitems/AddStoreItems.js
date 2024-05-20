@@ -34,7 +34,8 @@ const AddStoreItems = ({ updateprop }) => {
         addonpositions: [],
         servingfor: '',
         energy: '',
-        image: ''
+        image: '',
+        customize:''
 
     }
 
@@ -46,6 +47,7 @@ const AddStoreItems = ({ updateprop }) => {
         originalprice: '',
         offerprice: '',
         subcategoryid: '',
+        customize:''
 
 
     }
@@ -54,6 +56,8 @@ const AddStoreItems = ({ updateprop }) => {
         addonname: '',
         value: '',
         addonstatus: '',
+        type: '',
+        position:''
     }
 
     const [errorFields, setErrorFields] = useState(errors);
@@ -73,8 +77,8 @@ const AddStoreItems = ({ updateprop }) => {
     }, []);
 
     const { storeid, status, name, description, originalprice, offerprice, subcategoryid, deliverytime
-        , foodtype, servingfor, energy } = formfields;
-    const { addonname, value, addonstatus } = morefields;
+        , foodtype, servingfor, energy,customize } = formfields;
+    const { addonname, value, addonstatus, type, position } = morefields;
 
 
     const setFieldData = async () => {
@@ -109,10 +113,24 @@ const AddStoreItems = ({ updateprop }) => {
         const Response = await GetAllSubCategory(reqparams)
         setSubcategory(Response.data)
     }
+    
+    const updateRow = (index) => {
+
+        const updatedItems = data.filter((_, i) => i == index);
+        const RemainingItems = data.filter((_, i) => i !== index);
+
+        console.log("the updated items",updatedItems);
+        setMoreFields(updatedItems[0])
+        setData(RemainingItems);
+        // notifyTopFullWidth("Addon deleted successfully")
+
+
+    }
 
     const deleteRow = (index) => {
 
         const updatedItems = data.filter((_, i) => i !== index);
+        console.log("the remaining items",updatedItems);
         setData(updatedItems);
         notifyTopFullWidth("Addon deleted successfully")
 
@@ -150,6 +168,11 @@ const AddStoreItems = ({ updateprop }) => {
             formIsValid = false;
             errors["originalprice"] = "*Please enter originalprice .";
         }
+        if (!fields["customize"]) {
+            formIsValid = false;
+            errors["customize"] = "*Please select value .";
+        }
+        
 
         setErrorFields(errors)
         return formIsValid;
@@ -207,6 +230,7 @@ const AddStoreItems = ({ updateprop }) => {
 
             } else {
                 //update
+                // console.log("The final form field before upd", formfields);
                 const Response = await UpdateItems(formfields);
                 if (Response.data.id) {
                     notifyTopFullWidth("Data updated successfully");
@@ -238,10 +262,14 @@ const AddStoreItems = ({ updateprop }) => {
     }
 
     const submitAddons = async () => {
+
+        console.log("The more fields is", morefields);
+        console.log("morefromfileds",data);
+      
         setData([...data, morefields])
         setMoreFields(fields2)
         notifyTopFullWidth("addons added successfully")
-       
+
     }
 
 
@@ -403,7 +431,22 @@ const AddStoreItems = ({ updateprop }) => {
             </div>
 
 
+            <div className="form-group mb-3 col-md-6">
+                <label
 
+                >
+                    Customize
+                </label>
+                <select
+                    className="form-control" name='customize'
+                    onChange={handleChange} value={customize}>
+                    <option value="">Select value</option>
+                    <option value="true">True</option>
+                    <option value="false">False</option>
+                </select>
+
+                <div className="errorMsg">{errorFields.customize}</div>
+            </div>
 
 
             <div className="form-group mb-3 col-md-6">
@@ -453,6 +496,25 @@ const AddStoreItems = ({ updateprop }) => {
                         {/* <Addons/> */}
                         <div className="row">
                             <div className="form-group mb-3 col-md-3">
+                                <label>Position</label>
+                                <input component="input"
+                                    placeholder="position"
+                                    name="position"
+                                    className="form-control"
+                                    value={position} maxLength={50} onChange={handleChange1} />
+
+                            </div>
+                            <div className="form-group mb-3 col-md-3">
+                                <label>Type</label>
+                                <select
+                                    className="form-control" name='type'
+                                    onChange={handleChange1} value={type}>
+                                    <option value="">Select type</option>
+                                    <option value="Size">Size</option>
+                                    <option value="Toppings">Toppings</option>
+                                </select>
+                            </div>
+                            <div className="form-group mb-3 col-md-3">
                                 <label>Name</label>
                                 <input component="input"
                                     placeholder="name"
@@ -469,7 +531,7 @@ const AddStoreItems = ({ updateprop }) => {
                                     className="form-control"
                                     value={value} maxLength={50} onChange={handleChange1} />
                             </div>
-                            <div className="form-group mb-3 col-md-3">
+                            {/* <div className="form-group mb-3 col-md-3">
                                 <label>Status</label>
                                 <select
                                     className="form-control" name='addonstatus'
@@ -478,7 +540,7 @@ const AddStoreItems = ({ updateprop }) => {
                                     <option value="Active">Active</option>
                                     <option value="Inactive">Inactive</option>
                                 </select>
-                            </div>
+                            </div> */}
                             <div className="form-group mb-3 col-md-3">
                                 <Button onClick={submitAddons} className="me-2" variant="info">
                                     Save Addons
@@ -493,26 +555,44 @@ const AddStoreItems = ({ updateprop }) => {
                             <thead>
                                 <tr>
                                     <th>
+                                        <strong>Position</strong>
+                                    </th>
+                                    <th>
+                                        <strong>Type</strong>
+                                    </th>
+                                    <th>
                                         <strong>Name</strong>
                                     </th>
                                     <th>
                                         <strong>Value</strong>
                                     </th>
-                                    <th>
+                                    {/* <th>
                                         <strong>Status</strong>
-                                    </th>
+                                    </th> */}
                                 </tr>
                             </thead>
                             <tbody>
-                                {data?.map((item,index) => (
+
+                                {data?.map((item, index) => (
                                     <tr>
+                                        <td>{item.position}</td>
+                                        <td>{item.type}</td>
                                         <td>
                                             <strong>{item.addonname}</strong>
                                         </td>
                                         <td>{item.value}</td>
-                                        <td>{item.addonstatus}</td>
+                                        {/* <td>{item.addonstatus}</td> */}
                                         <td>
-                                            
+
+
+                                            <Button onClick={() => updateRow(index)} className="me-2" variant="danger">
+                                                Update
+                                            </Button>
+
+                                        </td>
+
+                                        <td>
+
 
                                             <Button onClick={() => deleteRow(index)} className="me-2" variant="danger">
                                                 Delete

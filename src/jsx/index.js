@@ -128,6 +128,7 @@ import DeliveryCharges from "./pages/admin/deliverycharges/DeliveryCharges";
 import Comission from "./pages/admin/comission/Comission";
 import GlobalCharges from "./pages/admin/globalcharges/GlobalCharges";
 import Intro from "./pages/admin/intro/Intro";
+import AreaManager from "./pages/admin/areamanager/AreaManager";
 
 
 
@@ -251,6 +252,8 @@ const Markup = () => {
     {url:'comission',component:Comission},
     {url:"globalcharges",component:GlobalCharges},
     {url:"intro",component:Intro},
+    {url:"areamanager",component:AreaManager},
+
 
 
 

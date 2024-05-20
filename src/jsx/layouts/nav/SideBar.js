@@ -255,6 +255,8 @@ const SideBar = () => {
                   to={"/advertisement"} >Advertisement</Link></li>
                     <li><Link className={`${path === "intro" ? "mm-active" : ""}`}
                   to={"/intro"} >Intro</Link></li>
+                   <li><Link className={`${path === "areamanager" ? "mm-active" : ""}`}
+                  to={"/areamanager"} >Area Manager</Link></li>
 
               
 

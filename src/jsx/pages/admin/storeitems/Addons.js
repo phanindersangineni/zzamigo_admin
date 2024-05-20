@@ -50,7 +50,7 @@ const Addons = ({itemprops}) => {
             pageno: '-1',
             query: { itemid:itemprops.id}
         }
-
+            console.log("all add ons is",reqdata);
         const Response =await GetAllAddons(reqdata);
         console.log("Addons",Response.data);
         setSectionList(Response.data);
@@ -97,6 +97,7 @@ const Addons = ({itemprops}) => {
             if (!formfields.id) {
                 //save
                 const Response = await SaveAddons(formfields);
+                console.log("saved addon resp is",Response.data);
                 if (Response.data.id) {
                     notifyTopFullWidth("Data saved successfully");
                     getAllSections();
