@@ -129,6 +129,7 @@ import Comission from "./pages/admin/comission/Comission";
 import GlobalCharges from "./pages/admin/globalcharges/GlobalCharges";
 import Intro from "./pages/admin/intro/Intro";
 import AreaManager from "./pages/admin/areamanager/AreaManager";
+import PushNotification from "./pages/admin/pushnotification/PushNotification";
 
 
 
@@ -253,6 +254,8 @@ const Markup = () => {
     {url:"globalcharges",component:GlobalCharges},
     {url:"intro",component:Intro},
     {url:"areamanager",component:AreaManager},
+    {url:"pushnotification",component:PushNotification},
+
 
 
 
