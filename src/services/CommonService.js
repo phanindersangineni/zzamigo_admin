@@ -1293,3 +1293,28 @@ export const DeleteAddons = async (data) => {
 
 } 
 
+export const genericmessage = async (data) => {
+    const constuserdetails = JSON.parse(localStorage.getItem('userDetails'));
+	
+    const headers = {
+        'content-type': 'application/json',
+        'X-Content-Type-Options': 'nosniff',
+        'X-Frame-Options': 'SAMEORIGIN',
+        'x-access-token': constuserdetails.accessToken,
+        
+       
+
+    }
+    return await axios.post(apiurl + "/api/v1/users/genericmsg",data,{'headers':headers})
+        .then((res) => {
+           
+            return res.data;
+        }).catch((error) => {
+            localStorage.removeItem('userDetails');
+            // window.location.reload();
+            return error;
+        });
+
+
+}
+

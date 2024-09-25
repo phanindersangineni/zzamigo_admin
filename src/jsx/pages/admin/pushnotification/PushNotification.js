@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { SaveBanner, SaveLogos, UpdateBanner, UpdateLogos } from '../../../../services/CommonService';
+import { GetAllTenants, SaveBanner, SaveLogos, UpdateBanner, UpdateLogos, genericmessage } from '../../../../services/CommonService';
 import { ToastContainer, toast } from "react-toastify";
 import FileBase64 from 'react-file-base64';
 import { Accordion } from 'react-bootstrap';
@@ -17,6 +17,10 @@ const PushNotification = ({ tenantprop, updateprop }) => {
     const [iconshow, setIconshow] = useState(null);
     const [webiconshow, setwebIconshow] = useState(null);
     const [faviconShow, setFaviconShow] = useState(null);
+    const [tenantlist, setTenantList] = useState([]);
+    // const [tenantid, setTenantId] = useState(null);
+
+
   
     const notifyTopFullWidth = (message) => {
         toast.info(message, {
@@ -32,8 +36,8 @@ const PushNotification = ({ tenantprop, updateprop }) => {
     const fields = {
         largeicon: '',
         status: '',
-        tenantid: tenantprop.tenantid,
-        tenant: tenantprop,
+        tenantid: "",
+        tenant: "",
         introcontonent: '',
         title:'',
         subtitle:''
@@ -44,7 +48,8 @@ const PushNotification = ({ tenantprop, updateprop }) => {
         status: '',
         introcontonent: '',
         title:'',
-        subtitle:''
+        subtitle:'',
+        tenantid:'',
 
     }
 
@@ -55,6 +60,7 @@ const PushNotification = ({ tenantprop, updateprop }) => {
 
 
     useEffect(() => {
+        getTenants();
         setFieldData();
 
 
@@ -62,7 +68,7 @@ const PushNotification = ({ tenantprop, updateprop }) => {
 
 
 
-    const { introcontonent, position, status, base64,title,subtitle } = formfields;
+    const { introcontonent, position, status, base64,title,subtitle, tenantid } = formfields;
 
     const setFieldData = async () => {
         if (updateprop?.id) {
@@ -219,23 +225,17 @@ const PushNotification = ({ tenantprop, updateprop }) => {
 
         if (!fields["introcontonent"]) {
             formIsValid = false;
-            errors["introcontonent"] = "*Please enter intro content .";
+            errors["introcontonent"] = "*Please enter message content .";
         }
         if (!fields["title"]) {
             formIsValid = false;
             errors["title"] = "*Please enter title .";
         }
-        if (!fields["subtitle"]) {
+        if (!fields["tenantid"]) {
             formIsValid = false;
-            errors["subtitle"] = "*Please enter sub title .";
+            errors["tenantid"] = "*Please select  tenant.";
         }
-        if (!fields["status"]) {
-            formIsValid = false;
-            errors["status"] = "*Please select status .";
-        }
-        if (filefields == null) {
-            errors["largeicon"] = "*Please choose Image .";
-        }
+
         
         setErrorFields(errors)
         return formIsValid;
@@ -270,14 +270,53 @@ const PushNotification = ({ tenantprop, updateprop }) => {
         }
     }
 
+    const submitForm2 = async () => {
+        const isValid = await validateForm();
+        if (isValid) {
+            const reqdata = {
+                tenantid: tenantid,
+                message: introcontonent,
+                title: title,
+                reqtype: 'NOTIFICATIONS'
+
+            }
+            console.log("the req params are",reqdata);
+            const resData = await genericmessage(reqdata);
+            console.log("the push noti",resData.message);
+            if (resData.message == 'SUCCESS') {
+                notifyTopFullWidth("push notification successful ");
+            } else {
+                notifyTopFullWidth("Failed to notify");
+            }
+        }
+        
+    }
+
     const handleChange = (e) => {
         const { name, value } = e.target;
+
+        console.log("anme value",name,value);
 
         setFromFields((prevState) => ({
             ...prevState,
             [name]: value
         }));
 
+    }
+
+
+    const getTenants = async () => {
+        const constuserdetails = JSON.parse(localStorage.getItem('userDetails'));
+        if(constuserdetails.roles[0] =='ROLE_ADMIN'){
+          
+        
+        const Response = await GetAllTenants({ pageno: -1,status:'Active' })
+        setTenantList(Response.data);
+        console.log("teannt list ",Response.data);
+        }else{
+            const Response = await GetAllTenants({ pageno: -1,status:'Active',query: { tenantid: constuserdetails.user.tenantid }})  
+            setTenantList(Response.data);
+        }
     }
 
     return (<>
@@ -292,6 +331,7 @@ const PushNotification = ({ tenantprop, updateprop }) => {
             draggable
             pauseOnHover
         />
+        <h2 style={{marginBottom:"50px"}}>Push Notification</h2>
         <div className="form-group mb-3 row">
             <label
                 className="col-lg-4 col-form-label"
@@ -299,15 +339,27 @@ const PushNotification = ({ tenantprop, updateprop }) => {
             >
                 Tenant Name
             </label>
-            <div className="col-lg-6">
-                <b> {tenantprop.name} </b>
+                        <div className="col-lg-3">
+                            <select className="form-control" name="tenantid"
+                                value={tenantid} onChange={handleChange}>
+                                <option value=''>Select Tenant</option>
+                                {tenantlist.map(item => (
+                                    <option
+                                        key={item.tenantid}
+                                        value={item.tenantid}
+                                    >
+                                        {item.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                     <div className="errorMsg">{errorFields.tenantid}</div>
 
-            </div>
         </div>
 
 
         <br />
-        <div className="form-group mb-3 row">
+        {/* <div className="form-group mb-3 row">
             <label
                 className="col-lg-4 col-form-label"
                 htmlFor="val-username"
@@ -325,25 +377,25 @@ const PushNotification = ({ tenantprop, updateprop }) => {
 
             </div>
             <div className="errorMsg">{errorFields.title}</div>
-        </div>
+        </div> */}
         <div className="form-group mb-3 row">
             <label
                 className="col-lg-4 col-form-label"
                 htmlFor="val-username"
             >
-               Sub Title
+               Message Title
             </label>
             <div className="col-lg-6">
 
             <input component="input"
-                        placeholder="subtitle"
-                        name="subtitle"
+                        placeholder="title"
+                        name="title"
                         className="form-control"
-                        value={subtitle} maxLength={500} onChange={handleChange} />
+                        value={title} maxLength={500} onChange={handleChange} />
 
 
             </div>
-            <div className="errorMsg">{errorFields.subtitle}</div>
+            <div className="errorMsg">{errorFields.title}</div>
         </div>
         <br/>
 
@@ -352,7 +404,7 @@ const PushNotification = ({ tenantprop, updateprop }) => {
                 className="col-lg-4 col-form-label"
                 htmlFor="val-username"
             >
-                Intro Content
+                Push Message
             </label>
             <div className="col-lg-6">
 
@@ -360,7 +412,7 @@ const PushNotification = ({ tenantprop, updateprop }) => {
                     rows={8}
                     className="form-control"
                     name="introcontonent"
-                    placeholder="Comment"
+                    placeholder="Message"
                     id="comment"
                     onChange={handleChange}
                     value={introcontonent}
@@ -373,7 +425,7 @@ const PushNotification = ({ tenantprop, updateprop }) => {
 
         <br />
 
-        <div className="form-group mb-3 row">
+        {/* <div className="form-group mb-3 row">
             <label
                 className="col-lg-4 col-form-label"
                 htmlFor="val-username"
@@ -391,13 +443,13 @@ const PushNotification = ({ tenantprop, updateprop }) => {
 
             </div>
             <div className="errorMsg">{errorFields.status}</div>
-        </div>
+        </div> */}
 
 
         <br />
 
 
-        <Accordion className="accordion accordion-danger-solid" defaultActiveKey="0">
+        {/* <Accordion className="accordion accordion-danger-solid" defaultActiveKey="0">
             <Accordion.Item key={percent} eventKey={`${percent}`}>
                 <Accordion.Header className="accordion-header">
                     Image 
@@ -435,14 +487,14 @@ const PushNotification = ({ tenantprop, updateprop }) => {
                 </Accordion.Collapse>
             </Accordion.Item>
 
-        </Accordion>
+        </Accordion> */}
 
 
 
    
         <div className="form-group">
-            <button onClick={submitForm} className="btn btn-primary" type="button"
-            >Save</button>
+            <button onClick={submitForm2} className="btn btn-primary" type="button"
+            >Send Now</button>
         </div>
 
     </>)
